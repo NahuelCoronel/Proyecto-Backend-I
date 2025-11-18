@@ -1,0 +1,62 @@
+[
+  {
+    "id": 1,
+    "title": "Empanada de Carne",
+    "description": "Relleno tradicional con carne, cebolla, morrón y aceitunas.",
+    "code": "EMP-CARNE",
+    "price": 1500,
+    "status": true,
+    "category": "Saladas",
+    "thumbnails": [
+      "imagenesEmpanadas/carne.jpg"
+    ]
+  },
+  {
+    "id": 2,
+    "title": "Empanada de Pollo",
+    "description": "Relleno suave de pollo, cebolla y morrón. Ideal para todos los gustos.",
+    "code": "EMP-POLLO",
+    "price": 1500,
+    "status": true,
+    "category": "Saladas",
+    "thumbnails": [
+      "imagenesEmpanadas/pollo.jpg"
+    ]
+  },
+  {
+    "id": 3,
+    "title": "Empanada de Jamón y Queso",
+    "description": "El clásico favorito con jamón, queso mozzarella y un toque de orégano.",
+    "code": "EMP-J&Q",
+    "price": 1500,
+    "status": true,
+    "category": "Saladas",
+    "thumbnails": [
+      "imagenesEmpanadas/jyq.jpg"
+    ]
+  },
+  {
+    "id": 4,
+    "title": "Empanada de Verdura",
+    "description": "Mezcla cremosa de acelga con salsa blanca y un toque de nuez moscada.",
+    "code": "EMP-VERD",
+    "price": 1500,
+    "status": true,
+    "category": "Vegetariana",
+    "thumbnails": [
+      "imagenesEmpanadas/verdura.jpg"
+    ]
+  },
+  {
+    "id": 5,
+    "title": "Empanada de Humita",
+    "description": "Sabor agridulce con choclo cremoso, cebolla y pimentón.",
+    "code": "EMP-HUMITA",
+    "price": 1500,
+    "status": true,
+    "category": "Vegetariana",
+    "thumbnails": [
+      "imagenesEmpanadas/humita.jpg"
+    ]
+  }
+]

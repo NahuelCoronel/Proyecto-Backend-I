@@ -1,244 +1,88 @@
-const express = require('express');
+import express from "express"
+import { createServer } from 'http';
+import { Server } from 'socket.io';
+import ProductosRoute from "../route/productos.route.js"
+import CarritosRoute from "../route/carritos.route.js"
+import { engine as handlebars } from 'express-handlebars' 
+import fs from 'fs/promises'; 
+import { fileURLToPath } from 'url';
+import path from 'path';  
+
+
+//const express = require('express');
 const app = express();
 const PORT = 8080;
 
-
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 app.use(express.json());
 
 
-let productos =  [
-    {
-        id: 1, 
-        title: "Empanada de Carne",
-        description: "Relleno tradicional con carne, cebolla, morrón y aceitunas.",
-        code: "EMP-CARNE",
-        price: 1500,
-        status: true,
-        stock: 50,
-        category: "Saladas",
-        thumbnails: ["imagenesEmpanadas/carne.jpg"] 
-    },
-    {
-        id: 2, 
-        title: "Empanada de Pollo",
-        description: "Relleno suave de pollo, cebolla y morrón. Ideal para todos los gustos.",
-        code: "EMP-POLLO",
-        price: 1500,
-        status: true,
-        stock: 45,
-        category: "Saladas",
-        thumbnails: ["imagenesEmpanadas/pollo.jpg"]
-    },
-    {
-        id: 3, 
-        title: "Empanada de Jamón y Queso",
-        description: "El clásico favorito con jamón, queso mozzarella y un toque de orégano.",
-        code: "EMP-J&Q",
-        price: 1500,
-        status: true,
-        stock: 60,
-        category: "Saladas",
-        thumbnails: ["imagenesEmpanadas/jyq.jpg"]
-    },
-    {
-        id: 4, 
-        title: "Empanada de Verdura",
-        description: "Mezcla cremosa de acelga con salsa blanca y un toque de nuez moscada.",
-        code: "EMP-VERD",
-        price: 1500,
-        status: true,
-        stock: 35,
-        category: "Vegetariana",
-        thumbnails: ["imagenesEmpanadas/verdura.jpg"]
-    },
-    {
-        id: 5, 
-        title: "Empanada de Humita",
-        description: "Sabor agridulce con choclo cremoso, cebolla y pimentón.",
-        code: "EMP-HUMITA",
-        price: 1500,
-        status: true,
-        stock: 40,
-        category: "Vegetariana",
-        thumbnails: ["imagenesEmpanadas/humita.jpg"]
+app.engine("handlebars",handlebars({
+    // Usamos path.join para crear una ruta absoluta y robusta para el directorio de layouts
+    layoutsDir: path.join(__dirname, "views", "layouts"),
+    // Especificamos que 'main' es el layout por defecto
+    defaultLayout: 'main',
+    partialsDir: path.join(__dirname, "views")}))
+app.set("views", path.join(__dirname , "views"))
+app.set("view engine", "handlebars")
+app.use(express.static(path.join(__dirname ,"static")))
+
+// 1. Creamos el servidor HTTP a partir de la app de Express
+const httpServer = createServer(app);
+
+// 2. Inicializamos el servidor de Socket.io sobre el servidor HTTP
+// Esto es CRUCIAL. IO es la instancia que usaremos para comunicarnos.
+const io = new Server(httpServer);
+
+app.use("/api/productos",ProductosRoute(io))
+app.use("/api/carts",CarritosRoute)
+
+
+async function readData(path) {
+    try {
+        const data = await fs.readFile(path, 'utf-8'); 
+        return JSON.parse(data);
+    } catch (error) {
+        // Devuelve array vacío si el archivo no existe (ENOENT) o está vacío
+        if (error.code === 'ENOENT' || error.message.includes('Unexpected end of JSON input')) {
+            return [];
+        }
+        console.error(`Error al leer el archivo ${path}:`, error.message);
+        throw error;
     }
-];
+}
+
+const PRODUCTOS_PATH = path.join(__dirname,"../data/productos.json");
 
 
-
-
-/////////////////////////PRODUCTOS//////////////////////////////////////////////////////////////////////
-//Listar todos los productos
-app.get('/api/productos/', (req, res) => {   
-    res.json(productos);
-});
-
-//Listar producto determinado
-app.get('/api/productos/:pid', (req, res) => {
-    const productId = req.params.pid;
-    const producto = productos.find(p=>p.id===parseInt(productId))
-    res.send(producto)
-});
-
-
-
-
-//Agregar un nuevo producto
-app.post('/api/productos/', (req, res) => {
-    const newProductData = req.body;
-    
-    const requiredFields = ['title', 'description', 'code', 'price', 'stock', 'category'];
-    const missingFields = requiredFields.filter(field => newProductData[field] === undefined);
-
-    if (missingFields.length > 0) {
-        return res.status(400).json({ 
-            error: `Faltan los siguientes campos obligatorios: ${missingFields.join(', ')}`
+app.get('/realTimeProducts', async (req, res) => {
+    try {
+        const productos = await readData(PRODUCTOS_PATH);
+        res.render('realTimeProducts', { 
+            title: "Catálogo de Productos",
+            productos: productos // Enviamos el array de productos a la vista
+        });
+    } catch (error) {
+        res.status(500).render('error', { 
+            title: "Error",
+            message: "No se pudieron cargar los productos."
         });
     }
-
-    const newProduct = {
-        id: (productos.length + 1),         
-        title: newProductData.title,
-        description: newProductData.description,
-        code: newProductData.code,
-        price: Number(newProductData.price),
-        status: newProductData.status !== undefined ? newProductData.status : true, 
-        stock: Number(newProductData.stock),
-        category: newProductData.category,
-        thumbnails: newProductData.thumbnails || [],
-    };
-
-    productos.push(newProduct);
-    res.status(201).json(newProduct);
 });
 
+// CONEXIÓN SOCKET.IO (Eventos)
+// ============================================
+io.on('connection', (socket) => {
+    console.log('🔌 Nuevo cliente conectado por WebSocket:', socket.id);
 
-//Actualizar un producto
-app.put('/api/productos/:pid', (req, res) => {
-    const productId = parseInt(req.params.pid);
-    const updateData = req.body;
-
-    if (updateData.id) {
-        delete updateData.id;
-    }
-
-    const productIndex = productos.findIndex(p => p.id === productId);
-
-    if (productIndex === -1) {
-        return res.status(404).json({ error: "Producto no encontrado para actualizar." });
-    }
-
-  
-    productos[productIndex] = {
-        ...productos[productIndex],
-        ...updateData
-    };
-    
-    if (productos[productIndex].price) {
-        productos[productIndex].price = Number(productos[productIndex].price);
-    }
-    if (productos[productIndex].stock) {
-        productos[productIndex].stock = Number(productos[productIndex].stock);
-    }
-
-    res.json({ 
-        message: "Producto actualizado con éxito.", 
-        product: productos[productIndex] 
+    // Puedes agregar manejo de desconexión aquí
+    socket.on('disconnect', () => {
+        console.log('❌ Cliente desconectado:', socket.id);
     });
 });
 
-
-//Eliminar el producto
-app.delete('/api/productos/:pid', (req, res) => {
-    const productId = parseInt(req.params.pid);
-    
-    const initialLength = productos.length;
-    
-    productos = productos.filter(p => p.id !== productId);
-
-    if (productos.length === initialLength) {
-        return res.status(404).json({ error: "Producto no encontrado para eliminar." });
-    }
-
-    res.json({ message: `Producto con ID ${productId} eliminado correctamente.` });
+httpServer.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
+    console.log(`¡WebSockets activos! Prueba en http://localhost:8080/realtimeproducts`);
 });
-
-
-////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-
-/////////////////////CARRITO////////////////////////////////////////////////////////////////////////////
-let carritos = []
-
-//Listar todos los carritos
-app.post('/api/carts/', (req, res) => {
-    let cantidad
-    if (carritos == []){
-        cantidad = 1
-    }
-    else{
-        cantidad = carritos.length + 1
-    }
-    const newCart = {
-        id: carritos.length + 1, 
-        products: [] 
-    };
-    carritos.push(newCart)
-    res.status(201).json(newCart)
-})
-
-
-//Listar productos de un carrito
-app.get('/api/carts/:cid', (req, res) => {
-    const cartId = parseInt(req.params.cid);
-    
-    const cart = carritos.find(c => c.id === cartId);
-
-    if (!cart) {
-        return res.status(404).json({ error: "Carrito no encontrado." });
-    }
-
-    res.json(cart.products);
-})
-
-
-//Agregar producto al carrito
-app.post('/api/carts/:cid/product/:pid', (req, res) => {
-    const cartId = parseInt(req.params.cid);
-    const productId = parseInt(req.params.pid);
-    
-    // 1. Buscar el carrito
-    const cart = carritos.find(c => c.id === cartId);
-    if (!cart) {
-        return res.status(404).json({ error: "Carrito no encontrado." });
-    }
-
-    // 2. Buscar si el producto ya está en el array 'products' del carrito
-    const existingProductInCart = cart.products.find(p => p.product === productId);
-    
-    if (existingProductInCart) {
-        // 3a. Si existe, incrementar la cantidad
-        existingProductInCart.quantity += 1;
-    } else {
-        // 3b. Si no existe, agregarlo con quantity: 1
-        cart.products.push({
-            product: productId, 
-            quantity: 1         
-        });
-    }
-    
-    // 4. Devolver la vista actualizada del carrito
-    res.json({ 
-        message: `Producto ${productId} agregado/actualizado en el carrito ${cartId}.`, 
-        cart: cart 
-    });
-});
-
-
-
-app.listen(PORT, () => {
-    console.log(`Servidor escuchando en el puerto ${PORT}`);
-});
-

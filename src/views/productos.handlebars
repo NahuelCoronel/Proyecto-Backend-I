@@ -1,0 +1,72 @@
+<div id="productos-container">
+    <h2 id="catalogo-titulo">Catálogo de Empanadas</h2>
+    
+    <!-- 
+        CONTENEDOR DE PRODUCTOS DINÁMICO
+        Utiliza CSS Grid para un layout de hasta 4 productos por fila (Ver estilo.css).
+    -->
+    <div id="lista-empanadas">
+        
+        {{#each productos}}
+        <!-- INICIO CARD DE PRODUCTO -->
+        <div class="empanada-item" data-id="{{this.id}}">
+            
+            <!-- 
+                Estructura de la Card 
+                'onerror' previene error si la imagen no existe. Si this.thumbnails.[0] falla, 
+                carga la imagen de placeholder. Si esa también falla, se verá el fondo CSS.
+            -->
+            <img 
+                src="{{this.thumbnails.[0]}}" 
+                alt="Imagen de {{this.title}}" 
+                onerror="this.onerror=null; this.src='/img/placeholder.jpg';"
+            >
+            
+            <h3>{{this.title}}</h3>
+            <p>{{this.description}}</p>
+            
+            <!-- Precio -->
+            <p class="precio">$ {{this.price}}</p>
+            
+            <div class="controles-empanada">
+                <!-- Botón de Eliminación (funcionalidad real-time con WebSockets) -->
+                <button class="btn-eliminar" data-id="{{this.id}}">
+                    Eliminar
+                </button>
+                
+                <!-- Botón para agregar al carrito 
+                <button class="btn-agregar" data-id="{{this.id}}">
+                    Agregar
+                </button>-->
+            </div> 
+            
+            <!-- Detalles técnicos discretos -->
+            <span class="detalle-codigo">Código: {{this.code}}</span>
+        </div>
+        <!-- FIN CARD DE PRODUCTO -->
+        {{/each}}
+        
+    </div>
+    
+    <!-- 
+        FORMULARIO PARA AGREGAR NUEVO PRODUCTO
+    -->
+    <h3 class="mt-5 mb-3">Agregar Nuevo Producto</h3>
+    
+    <form id="form-agregar-producto" class="formulario-producto-nuevo">
+        <label for="title">Título:</label><input type="text" id="title" name="title" required>
+        <label for="code">Código:</label><input type="text" id="code" name="code" required>
+        <label for="description">Descripción:</label><textarea id="description" name="description" required></textarea>
+        <label for="price">Precio:</label><input type="number" id="price" name="price" required>
+        <label for="category">Categoría:</label><input type="text" id="category" name="category" required>
+        
+        <button type="submit" class="btn-submit">Crear Producto</button>
+    </form>
+    
+</div>
+
+<!-- 
+    SCRIPTS REQUERIDOS para la interacción en tiempo real
+-->
+<script src="/socket.io/socket.io.js"></script>
+<script src="/js/products.js"></script> 

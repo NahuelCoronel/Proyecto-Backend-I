@@ -1,0 +1,254 @@
+/*
+==================================================
+  1. Base y Tipografía (Celeste Suave/Blanco)
+==================================================
+*/
+:root {
+    --color-primary: #4CA7D8; /* Celeste principal suave (más claro que el anterior) */
+    --color-light: #F0F8FF; /* Azul muy pálido, casi blanco, para fondos suaves */
+    --color-background: #FFFFFF; /* Fondo Blanco Puro */
+    --color-text-dark: #343A40;
+    --color-text-muted: #6C757D;
+    --color-shadow: rgba(0, 0, 0, 0.1);
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    background-color: var(--color-light); /* Fondo Celeste Suave */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    padding-top: 100px; /* Espacio para el encabezado fijo */
+    color: var(--color-text-dark);
+}
+
+h1, h2, h3 {
+    color: var(--color-primary);
+    margin-bottom: 20px;
+}
+
+p {
+    color: var(--color-text-muted);
+}
+
+/*
+==================================================
+  2. Encabezado Fijo
+==================================================
+*/
+#encabezado-fijo {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white; /* Header blanco puro */
+    padding: 15px 20px;
+    z-index: 1000;
+    height: 100px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px var(--color-shadow);
+}
+
+.header-content {
+    text-align: center;
+}
+
+.header-content h1 {
+    font-size: 2.0em; /* Un poco más grande */
+    margin: 0;
+}
+
+.header-content p {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--color-text-dark);
+}
+
+/*
+==================================================
+  3. Contenedor Principal (Catálogo)
+==================================================
+*/
+#productos-container {
+    max-width: 1280px;
+    width: 95%;
+    margin: 30px auto;
+    padding: 20px;
+    background-color: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+#catalogo-titulo {
+    text-align: center;
+    font-size: 2.2em;
+    border-bottom: 3px solid var(--color-primary);
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+/*
+==================================================
+  4. Lista de Productos (Layout Grid: Max 4 por Fila)
+==================================================
+*/
+#lista-empanadas {
+    display: grid;
+    /* La clave: repite columnas que se ajustan, siendo cada una de 250px mínimo.
+       Esto garantiza 4 por fila en pantallas grandes y se ajusta en móviles. */
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 30px;
+    padding: 0;
+    list-style: none;
+    margin-bottom: 50px;
+}
+
+.empanada-item {
+    background-color: white;
+    border: 1px solid var(--color-light);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    min-height: 350px; /* Altura mínima para que se vean parejos */
+}
+
+.empanada-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.empanada-item img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    border: 2px solid var(--color-light); /* Borde suave */
+    /* Estilo para el placeholder: si falla la imagen, se ve este fondo */
+    background-color: var(--color-light);
+    content: "No Image"; /* Esto no funciona en CSS para <img>, pero el fondo ayuda */
+}
+
+.empanada-item h3 {
+    font-size: 1.3em;
+    margin-top: 0;
+    margin-bottom: 5px;
+    color: var(--color-text-dark); /* Título en negro para contraste */
+}
+
+.empanada-item p:not(.precio) {
+    font-size: 0.9em;
+    margin-bottom: 15px;
+    flex-grow: 1; 
+}
+
+.precio {
+    font-size: 1.6em;
+    color: var(--color-primary);
+    font-weight: 700;
+    margin: 10px 0;
+    text-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+}
+
+/*
+==================================================
+  5. Botones y Controles
+==================================================
+*/
+.controles-empanada {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+.controles-empanada button, .btn-submit, #login-container button {
+    padding: 12px 15px;
+    border: none;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.1s;
+    width: 100%;
+}
+
+.btn-agregar {
+    background-color: var(--color-primary);
+    color: white;
+    box-shadow: 0 3px 6px rgba(0, 160, 255, 0.3);
+}
+
+.btn-agregar:hover {
+    background-color: #3884b8; /* Celeste ligeramente más oscuro */
+    transform: translateY(-2px);
+}
+
+.btn-eliminar {
+    background-color: #DC3545; /* Rojo de Bootstrap para Eliminar */
+    color: white;
+}
+
+.btn-eliminar:hover {
+    background-color: #C82333;
+}
+
+.btn-submit {
+    background-color: #28A745; /* Verde para Crear/Guardar */
+    color: white;
+    margin-top: 20px;
+}
+.btn-submit:hover {
+    background-color: #1E7E34;
+}
+
+/* Detalles técnicos discretos */
+.detalle-codigo, .detalle-stock {
+    display: block;
+    font-size: 0.75em;
+    color: #ADB5BD;
+    margin-top: 5px;
+}
+
+
+/*
+==================================================
+  6. Formulario Nuevo Producto
+==================================================
+*/
+.formulario-producto-nuevo {
+    background-color: var(--color-light); /* Fondo celeste pálido para el formulario */
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.formulario-producto-nuevo label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    font-weight: 700;
+    color: var(--color-text-dark);
+}
+
+.formulario-producto-nuevo input[type="text"],
+.formulario-producto-nuevo input[type="number"],
+.formulario-producto-nuevo textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--color-primary); /* Borde celeste */
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.formulario-producto-nuevo textarea {
+    resize: vertical;
+}
